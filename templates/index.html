@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>オンライン商談リンク作成 - nocall</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
+          "Helvetica Neue", Arial, sans-serif;
+        background: #f5f5f5;
+        min-height: 100vh;
+        padding: 40px 20px;
+      }
+
+      .container {
+        max-width: 600px;
+        margin: 0 auto;
+        background: white;
+        border: 1px solid #e0e0e0;
+        border-radius: 4px;
+      }
+
+      .header {
+        padding: 24px 32px;
+        border-bottom: 1px solid #e0e0e0;
+      }
+
+      .logo {
+        font-size: 18px;
+        font-weight: 600;
+        color: #000;
+      }
+
+      .subtitle {
+        font-size: 13px;
+        color: #666;
+        margin-top: 4px;
+      }
+
+      .content {
+        padding: 32px;
+      }
+
+      .form-group {
+        margin-bottom: 20px;
+      }
+
+      label {
+        display: block;
+        font-size: 13px;
+        font-weight: 500;
+        color: #333;
+        margin-bottom: 6px;
+      }
+
+      input,
+      select {
+        width: 100%;
+        padding: 10px 12px;
+        border: 1px solid #d0d0d0;
+        border-radius: 3px;
+        font-size: 14px;
+        font-family: inherit;
+      }
+
+      input:focus,
+      select:focus {
+        outline: none;
+        border-color: #000;
+      }
+
+      .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+      }
+
+      .btn {
+        width: 100%;
+        padding: 12px;
+        background: #000;
+        color: white;
+        border: none;
+        border-radius: 3px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        font-family: inherit;
+      }
+
+      .btn:hover {
+        background: #333;
+      }
+
+      .btn:disabled {
+        background: #ccc;
+        cursor: not-allowed;
+      }
+
+      .result {
+        display: none;
+        margin-top: 32px;
+        padding: 24px;
+        background: #fafafa;
+        border: 1px solid #e0e0e0;
+        border-radius: 3px;
+      }
+
+      .result.show {
+        display: block;
+      }
+
+      .result-title {
+        font-size: 14px;
+        font-weight: 600;
+        color: #000;
+        margin-bottom: 20px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid #e0e0e0;
+      }
+
+      .result-item {
+        margin-bottom: 16px;
+      }
+
+      .result-label {
+        font-size: 12px;
+        color: #666;
+        margin-bottom: 4px;
+      }
+
+      .result-value {
+        font-size: 13px;
+        color: #000;
+        word-break: break-all;
+      }
+
+      .zoom-link {
+        color: #0066cc;
+        text-decoration: none;
+      }
+
+      .zoom-link:hover {
+        text-decoration: underline;
+      }
+
+      .calendar-btn {
+        display: inline-block;
+        margin-top: 16px;
+        padding: 10px 20px;
+        background: #000;
+        color: white;
+        text-decoration: none;
+        border-radius: 3px;
+        font-size: 13px;
+        font-weight: 500;
+      }
+
+      .calendar-btn:hover {
+        background: #333;
+      }
+
+      .error {
+        display: none;
+        margin-top: 16px;
+        padding: 12px;
+        background: #fff3f3;
+        border: 1px solid #ffcccc;
+        border-radius: 3px;
+        color: #cc0000;
+        font-size: 13px;
+      }
+
+      .error.show {
+        display: block;
+      }
+
+      .icon {
+        display: inline-block;
+        width: 16px;
+        height: 16px;
+        vertical-align: middle;
+        margin-right: 6px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <div class="logo">nocall株式会社</div>
+        <div class="subtitle">オンライン商談リンク作成システム</div>
+      </div>
+
+      <div class="content">
+        <form id="meetingForm">
+          <div class="form-group">
+            <label>商談名</label>
+            <input
+              type="text"
+              id="meeting_name"
+              placeholder="吉田様との商談"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label>招待者メールアドレス</label>
+            <input
+              type="email"
+              id="attendee_email"
+              placeholder="customer@example.com"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label>日付</label>
+            <input type="date" id="meeting_date" required />
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>時刻</label>
+              <input type="time" id="meeting_time" value="14:00" required />
+            </div>
+
+            <div class="form-group">
+              <label>所要時間</label>
+              <select id="duration">
+                <option value="15">15分</option>
+                <option value="30" selected>30分</option>
+                <option value="45">45分</option>
+                <option value="60">60分</option>
+              </select>
+            </div>
+          </div>
+
+          <button type="submit" class="btn" id="submitBtn">作成</button>
+        </form>
+
+        <div class="error" id="error"></div>
+
+        <div class="result" id="result">
+          <div class="result-title">ミーティング作成完了</div>
+
+          <div class="result-item">
+            <div class="result-label">商談名</div>
+            <div class="result-value" id="result_topic"></div>
+          </div>
+
+          <div class="result-item">
+            <div class="result-label">Zoom参加URL</div>
+            <div class="result-value">
+              <a href="#" id="result_url" target="_blank" class="zoom-link"></a>
+            </div>
+          </div>
+
+          <div class="result-item">
+            <div class="result-label">ミーティングID</div>
+            <div class="result-value" id="result_id"></div>
+          </div>
+
+          <a href="#" id="calendar_link" target="_blank" class="calendar-btn">
+            Googleカレンダーに追加
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // デフォルトで明日の日付を設定
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      document.getElementById("meeting_date").value = tomorrow
+        .toISOString()
+        .split("T")[0];
+
+      document
+        .getElementById("meetingForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+
+          const submitBtn = document.getElementById("submitBtn");
+          const errorDiv = document.getElementById("error");
+          const resultDiv = document.getElementById("result");
+
+          submitBtn.disabled = true;
+          submitBtn.textContent = "作成中...";
+          errorDiv.classList.remove("show");
+          resultDiv.classList.remove("show");
+
+          const formData = {
+            meeting_name: document.getElementById("meeting_name").value,
+            attendee_email: document.getElementById("attendee_email").value,
+            meeting_date: document.getElementById("meeting_date").value,
+            meeting_time: document.getElementById("meeting_time").value,
+            duration: document.getElementById("duration").value,
+          };
+
+          try {
+            const response = await fetch("/create-meeting", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(formData),
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+              document.getElementById("result_topic").textContent =
+                data.meeting.topic;
+              document.getElementById("result_url").textContent =
+                data.meeting.join_url;
+              document.getElementById("result_url").href =
+                data.meeting.join_url;
+              document.getElementById("result_id").textContent =
+                data.meeting.meeting_id;
+              document.getElementById("calendar_link").href = data.calendar_url;
+
+              resultDiv.classList.add("show");
+            } else {
+              throw new Error(data.error || "エラーが発生しました");
+            }
+          } catch (error) {
+            errorDiv.textContent = error.message;
+            errorDiv.classList.add("show");
+          } finally {
+            submitBtn.disabled = false;
+            submitBtn.textContent = "作成";
+          }
+        });
+    </script>
+  </body>
+</html>
